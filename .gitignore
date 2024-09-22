@@ -144,6 +144,8 @@ DocProject/Help/html
 # Click-Once directory
 publish/
 *.db
+*.db-shm
+*.db-wal
 Migrations/
 
 # Publish Web Output

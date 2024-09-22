@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebApiProject.Models;
 
 namespace WebApiProject.Controllers
@@ -8,39 +9,31 @@ namespace WebApiProject.Controllers
     [Route("api/[controller]")]
     public class ProductsController:ControllerBase
     {
-        private static List<Product>? _products;
+        private readonly ProductsContext _context;
         
-        public ProductsController()
+        public ProductsController(ProductsContext context)
         {
-            _products =
-            [
-                new Product{ ProductId = 1, ProductName = "IPhone 14",Price=46000, IsActive = true},
-                new Product{ ProductId = 2, ProductName = "IPhone 15",Price=56000, IsActive = true},
-                new Product{ ProductId = 3, ProductName = "IPhone 16",Price=66000, IsActive = true},
-                new Product{ ProductId = 4, ProductName = "IPhone 17",Price=76000, IsActive = false},
-            ];
+            _context = context;
         }
         
         [HttpGet]
-        public IActionResult GetProducts()
+        public async Task<IActionResult> GetProducts()
         {
-            if(_products == null)
-            {
-                return NotFound();
-            }
+            
+            var products = await _context.Products.ToListAsync();
 
-            return Ok(_products);
+            return Ok(products);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetProduct(int? id)
+        public async Task<IActionResult> GetProduct(int? id)
         {
             if(id == null)
             {
                 return NotFound();
             }
 
-            var p = _products?.FirstOrDefault(x => x.ProductId == id);
+            var p = await _context.Products.FirstOrDefaultAsync(x => x.ProductId == id);
 
             if(p == null)
             {
@@ -48,6 +41,14 @@ namespace WebApiProject.Controllers
             }
 
             return Ok(p);
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct(Product entity)
+        {
+            _context.Products.Add(entity);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetProduct) , new {id = entity.ProductId},entity);
         }
     }
 }
