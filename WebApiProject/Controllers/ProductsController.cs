@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApiProject.DTO;
 using WebApiProject.Models;
 
 namespace WebApiProject.Controllers
@@ -20,7 +21,11 @@ namespace WebApiProject.Controllers
         public async Task<IActionResult> GetProducts()
         {
             
-            var products = await _context.Products.ToListAsync();
+            var products = await _context
+                                .Products
+                                .Where(x => x.IsActive)
+                                .Select(x => ProductToDTO(x))
+                                .ToListAsync();
 
             return Ok(products);
         }
@@ -33,7 +38,11 @@ namespace WebApiProject.Controllers
                 return NotFound();
             }
 
-            var p = await _context.Products.FirstOrDefaultAsync(x => x.ProductId == id);
+            var p = await _context
+                            .Products
+                            .Where(x => x.IsActive)
+                            .Select(x => ProductToDTO(x))
+                            .FirstOrDefaultAsync(x => x.ProductId == id);
 
             if(p == null)
             {
@@ -108,6 +117,14 @@ namespace WebApiProject.Controllers
             }
             
             return NoContent();
+        }
+        private static ProductDTO ProductToDTO(Product p)
+        {
+            return new ProductDTO{
+                ProductId = p.ProductId,
+                ProductName = p.ProductName,
+                Price = p.Price,
+            };
         }
     }
 }
