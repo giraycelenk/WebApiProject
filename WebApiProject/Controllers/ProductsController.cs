@@ -16,7 +16,7 @@ namespace WebApiProject.Controllers
             _context = context;
         }
         
-        [HttpGet]
+        [HttpGet("GetProducts")]
         public async Task<IActionResult> GetProducts()
         {
             
@@ -25,8 +25,8 @@ namespace WebApiProject.Controllers
             return Ok(products);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetProduct(int? id)
+        [HttpGet("GetProduct")]
+        public async Task<IActionResult> GetProduct(int id)
         {
             if(id == null)
             {
@@ -42,7 +42,7 @@ namespace WebApiProject.Controllers
 
             return Ok(p);
         }
-        [HttpPost]
+        [HttpPost("CreateProduct")]
         public async Task<IActionResult> CreateProduct(Product entity)
         {
             _context.Products.Add(entity);
@@ -51,7 +51,7 @@ namespace WebApiProject.Controllers
             return CreatedAtAction(nameof(GetProduct) , new {id = entity.ProductId},entity);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("UpdateProduct")]
         public async Task<IActionResult> UpdateProduct(int id,Product entity)
         {
             if(id != entity.ProductId)
@@ -81,8 +81,8 @@ namespace WebApiProject.Controllers
             
             return NoContent();
         }
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProduct(int? id)
+        [HttpDelete("DeleteProduct")]
+        public async Task<IActionResult> DeleteProduct(int id)
         {
             if(id == null)
             {
