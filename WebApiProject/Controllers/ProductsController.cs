@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiProject.DTO;
@@ -5,7 +6,6 @@ using WebApiProject.Models;
 
 namespace WebApiProject.Controllers
 {
-
     [ApiController]
     [Route("api/[controller]")]
     public class ProductsController:ControllerBase
@@ -16,7 +16,7 @@ namespace WebApiProject.Controllers
         {
             _context = context;
         }
-        
+        [Authorize]
         [HttpGet("GetProducts")]
         public async Task<IActionResult> GetProducts()
         {
@@ -29,7 +29,7 @@ namespace WebApiProject.Controllers
 
             return Ok(products);
         }
-
+        [Authorize]
         [HttpGet("GetProduct")]
         public async Task<IActionResult> GetProduct(int id)
         {
@@ -40,9 +40,9 @@ namespace WebApiProject.Controllers
 
             var p = await _context
                             .Products
-                            .Where(x => x.IsActive)
+                            .Where(x => x.ProductId == id && x.IsActive)
                             .Select(x => ProductToDTO(x))
-                            .FirstOrDefaultAsync(x => x.ProductId == id);
+                            .FirstOrDefaultAsync();
 
             if(p == null)
             {
@@ -51,6 +51,7 @@ namespace WebApiProject.Controllers
 
             return Ok(p);
         }
+        [Authorize]
         [HttpPost("CreateProduct")]
         public async Task<IActionResult> CreateProduct(Product entity)
         {
@@ -59,7 +60,7 @@ namespace WebApiProject.Controllers
 
             return CreatedAtAction(nameof(GetProduct) , new {id = entity.ProductId},entity);
         }
-
+        [Authorize]
         [HttpPut("UpdateProduct")]
         public async Task<IActionResult> UpdateProduct(int id,Product entity)
         {
@@ -90,6 +91,7 @@ namespace WebApiProject.Controllers
             
             return NoContent();
         }
+        [Authorize]
         [HttpDelete("DeleteProduct")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
@@ -120,11 +122,14 @@ namespace WebApiProject.Controllers
         }
         private static ProductDTO ProductToDTO(Product p)
         {
-            return new ProductDTO{
-                ProductId = p.ProductId,
-                ProductName = p.ProductName,
-                Price = p.Price,
-            };
+            var entity = new ProductDTO();
+            if(p != null)
+            {
+                entity.ProductId = p.ProductId;
+                entity.ProductName = p.ProductName;
+                entity.Price = p.Price;
+            }
+            return entity;
         }
     }
 }
